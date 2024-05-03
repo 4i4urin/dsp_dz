@@ -1,31 +1,33 @@
 #include "goertzel.h"
-#include <math.h>
+#include "cos_table.h"
 #include <stdio.h>
 
-#define PI 3.141592653589793
+
+s16 get_cos(u16 index);
 
 
-u8 goertzel(const s8* pin_vect, const u16 pin_vect_len, const u16 freq_index)
+u8 goertzel(const s8* pin_vect, const u16 in_vect_len, const u16 freq_index)
 {
     s32 u0 = 0;
     s32 u1 = 0;
     s32 u2 = 0;
 
-    s32 cos_val = cos(2*PI*freq_index/pin_vect_len) * 2 * 10000;
-    for (u16 i = 0; i < pin_vect_len; i++)
+    s32 cos_val = get_cos(freq_index);
+    s32 sin_val = isqrt_newton( (1 << 24) - cos_val * cos_val );
+
+    for (u16 i = 0; i < in_vect_len; i++)
     {
-        u0 = cos_val * u1 / 10000 - u2 + pin_vect[i];
+        u0 = ((cos_val * u1) >> 11) - u2 + pin_vect[i];
         u2 = u1;
         u1 = u0;
     }
 
-    s32 res_re = u0 * 10000 - cos(2*PI*freq_index/pin_vect_len) * 10000 * u2;
-    s32 res_im = -sin(2*PI*freq_index/pin_vect_len) * 10000 * u2;
-    res_re /= 10000;
-    res_im /= 10000;
-    printf("res_re = %d res_im = %d\n", res_re, res_im);
+    s32 res_re = (u0 << 12) - cos_val * u2;
+    s32 res_im = -sin_val * u2;
+    res_re >>= 12;
+    res_im >>= 12;
 
-    return 2 * isqrt_newton( (s32)(res_re*res_re) + (s32)(res_im*res_im)) / pin_vect_len;
+    return 2 * isqrt_newton( (u32)(res_re*res_re) + (u32)(res_im*res_im)) / in_vect_len;
 }
 
 
@@ -50,5 +52,20 @@ u16 isqrt_newton(const u32 val)
     }
     // was return (u16) x0;
     return (u16) (x0 <= 1) ? 0 : x0;
+}
+
+
+s16 get_cos(u16 index)
+{
+    if (index <= 250)
+        return table_cos[index];
+    else if (index <= 500)
+        return -table_cos[500 - index];
+    else if (index <= 750)
+        return -table_cos[index - 500];
+    else if (index <= 1000)
+        return table_cos[1000 - index];
+    else
+        return 0;
 }
 

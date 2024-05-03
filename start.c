@@ -5,7 +5,7 @@
 
 #define VECT_LEN 1000
 #define FREQ_NUM 8
-#define SEMPLING_FREQ 8000
+#define SEMPLING_FREQ 24000
 
 void read_in_vect(FILE* file, s8* pin_vect, u16 vect_len);
 u8 read_user_freq(u16* p_freq_arr, u8 freq_lim);
@@ -65,3 +65,4 @@ void read_in_vect(FILE* file, s8* pin_vect, u16 vect_len)
     for (u16 i = 0; i < vect_len; i++)
         fscanf(file, "%hhd\n", pin_vect + i);
 }
+
