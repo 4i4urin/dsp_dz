@@ -15,19 +15,22 @@ int main(void)
     s8 in_vect[VECT_LEN] = { 0 };
     u8 freq_num = 0;
     u16 freq_arr[FREQ_NUM] = { 0 };
+    u8 goert_res[FREQ_NUM] = { 0 };
 
     read_in_vect(fopen("input.txt", "r"), in_vect, VECT_LEN);
     freq_num = read_user_freq(freq_arr, FREQ_NUM);
 
-    // do goertsel things
-    u8 goer_res = 0;
     for (u8 i = 0; i < freq_num; i++)
-    {
-        goer_res = goertzel(in_vect, VECT_LEN, 
-            freq_arr[i] * VECT_LEN / SEMPLING_FREQ);
-        printf("\nFind freq = %d\nres = %d\n", freq_arr[i], goer_res);
-    }
-    
+        if (freq_arr[i] >= SEMPLING_FREQ / 2)
+            freq_arr[i] = 0;
+        else     
+            freq_arr[i] = freq_arr[i] * VECT_LEN / SEMPLING_FREQ;
+
+    // do goertsel things
+    goertzel_arr(in_vect, VECT_LEN, freq_arr, freq_num, goert_res);
+    for (u8 i = 0; i < freq_num; i++)
+        printf("\nFind freq = %d\nres = %d\n", 
+            freq_arr[i] * SEMPLING_FREQ / VECT_LEN, goert_res[i]);    
     
     return 0;
 }

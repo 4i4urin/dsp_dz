@@ -12,6 +12,10 @@
 #define s32 int32_t
 
 
+u8* goertzel_arr(
+    const s8* pin_vect, const u16 in_vect_len, 
+    const u16* freq_index, const u8 freq_index_len, u8* res);
+
 u8 goertzel(const s8* pin_vect, const u16 pin_vect_len, const u16 freq_index);
 u16 isqrt_newton(const u32 val);
 
